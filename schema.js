@@ -1,31 +1,31 @@
 exports.typeDefs = `
 
-type Recipe {
-  _id: ID
-  name: String!
-  category: String!
-  description: String!
-  instructions: String!
-  createdDate: String
-  likes: Int 
-  username: String
-}
+  type Recipe {
+    _id: ID
+    name: String!
+    category: String!
+    description: String!
+    instructions: String!
+    createdDate: String
+    likes: Int 
+    username: String
+  }
 
-type User {
-  _id: ID
-  username: String! @unique
-  password: String! 
-  email: String!
-  joinDate: String
-  favoirtes: [Recipe]
-}
+  type User {
+    _id: ID
+    username: String! @unique
+    password: String! 
+    email: String!
+    joinDate: String
+    favoirtes: [Recipe]
+  }
 
-type Query {
-  getAllRecipes: [Recipe]
-}
+  type Query {
+    getAllRecipes: [Recipe]
+  }
 
-type Mutation {
-  addRecipe(name: String!, description: String!, category: String!, instructions: String!, username: String): Recipe
-}
+  type Mutation {
+    addRecipe(name: String!, description: String!, category: String!, instructions: String!, username: String): Recipe
+  }
 
 `;

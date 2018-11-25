@@ -19,6 +19,16 @@ exports.resolvers = {
       return recipe;
     },
 
+    searchRecipes: async (root, { searchTerm }, { Recipe }) => {
+      if (searchTerm) {
+        //search
+      }
+      else {
+        const recipes = await Recipe.find().sort({ likes: 'desc', createdDate: 'desc' });
+        return recipes;
+      }
+    },
+
     getCurrentUser: async (root, args, { currentUser, User }) => {
       if (!currentUser) {
         return null;

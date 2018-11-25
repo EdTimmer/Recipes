@@ -8,10 +8,17 @@ const createToken = (user, secret, expiresIn) => {
 
 exports.resolvers = {
   Query: {
+
     getAllRecipes: async (root, args, { Recipe }) => {
       const allRecipes = await Recipe.find();
       return allRecipes;
     },
+
+    getRecipe: async (root, { _id }, { Recipe }) => {
+      const recipe = await Recipe.findOne({ _id });
+      return recipe;
+    },
+
     getCurrentUser: async (root, args, { currentUser, User }) => {
       if (!currentUser) {
         return null;
@@ -24,6 +31,7 @@ exports.resolvers = {
       return user;
     }
   },
+
   Mutation: {
 
     addRecipe: async (root, { name, description, category, instructions, username }, { Recipe }) => {

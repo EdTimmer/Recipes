@@ -17,7 +17,7 @@ exports.typeDefs = `
     password: String! 
     email: String!
     joinDate: String
-    favoirtes: [Recipe]
+    favorites: [Recipe]
   }
 
   type Query {

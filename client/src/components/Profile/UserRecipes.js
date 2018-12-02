@@ -2,81 +2,197 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 
 import { Query, Mutation } from 'react-apollo';
-import { GET_USER_RECIPES, DELETE_USER_RECIPE, GET_ALL_RECIPES, GET_CURRENT_USER } from '../../queries';
+import { GET_USER_RECIPES, DELETE_USER_RECIPE, GET_ALL_RECIPES, GET_CURRENT_USER, UPDATE_USER_RECIPE } from '../../queries';
 import Spinner from '../Spinner';
 
-const handleDelete = deleteUserRecipe => {
-  const confirmDelete = window.confirm('Are you sure you want to delete this recipe?');
-  if (confirmDelete) {
-    deleteUserRecipe().then(({ data }) => {
-      // console.log(data);
+class UserRecipes extends React.Component {
+
+  state = {
+    _id: '',
+    name: '',
+    imageUrl: '',
+    category: '',
+    description: '',
+    modal: false
+
+  }
+
+  handleChange = event => {
+    const { name, value } = event.target;
+    this.setState({
+      [name]: value
+    });
+  }
+
+  handleDelete = deleteUserRecipe => {
+    const confirmDelete = window.confirm('Are you sure you want to delete this recipe?');
+    if (confirmDelete) {
+      deleteUserRecipe().then(({ data }) => {
+        // console.log(data);
+      })
+    }
+  };
+
+  handleSubmit = (event, updateUserRecipe) => {
+    event.preventDefault();
+    updateUserRecipe().then(({ data }) => {
+      this.closeModal();
     })
   }
 
-};
+  loadRecipe = recipe => {
+    this.setState({ ...recipe, modal: true })
+  }
 
-const UserRecipes = ({ username }) => (
-  <Query query={GET_USER_RECIPES} variables={{username}}>
-    {
-      ({ data, loading, error }) => {
-        if (loading) return <Spinner />
-        if (error) return <div>Error</div>
-        // console.log(data)
-        return (
-          <ul>
-          <h3>Your Recipes</h3>
-          {!data.getUserRecipes.length && <p><strong>You haven't added any recipes yet</strong></p>}
-          {
-            data.getUserRecipes.map(recipe => (
-              <li key={recipe._id}>
-                <Link to={`/recipes/${recipe._id}`}><p>{recipe.name}</p></Link>
-                <p style={{ marginBottom: '0'}}>Likes: {recipe.likes}</p>
+  closeModal = () => {
+    this.setState({ modal: false })
+  }
 
-                <Mutation 
-                  mutation={DELETE_USER_RECIPE} variables={{ _id: recipe._id }}
-                  refetchQueries={() => [
-                    { query: GET_ALL_RECIPES },
-                    { query: GET_CURRENT_USER }
-                  ]}
-                  update={(cache, { data: { deleteUserRecipe } }) => {
-                    const { getUserRecipes } = cache.readQuery({
-                      query: GET_USER_RECIPES,
-                      variables: { username }
-                    });
-
-                    cache.writeQuery({
-                      query: GET_USER_RECIPES,
-                      variables: { username },
-                      data: {
-                        getUserRecipes: getUserRecipes.filter(recipe => recipe._id !== deleteUserRecipe._id)
-                      }
-                    })
-                  }}
-                >
+  render() {
+    const { username } = this.props;
+    const { modal } = this.state;
+    return (
+      <Query query={GET_USER_RECIPES} variables={{ username }}>
+        {
+          ({ data, loading, error }) => {
+            if (loading) return <Spinner />
+            if (error) return <div>Error</div>
+            // console.log(data)
+            return (
+              <ul>
+                {modal && <EditRecipeModal
+                  handleSubmit={this.handleSubmit}
+                  recipe={this.state}
+                  closeModal={this.closeModal} handleChange={this.handleChange} />}
+                <h3>Your Recipes</h3>
+                {!data.getUserRecipes.length && <p><strong>You haven't added any recipes yet</strong></p>}
                 {
-                  (deleteUserRecipe, attrs = {} ) => {
+                  data.getUserRecipes.map(recipe => (
+                    <li key={recipe._id}>
+                      <Link to={`/recipes/${recipe._id}`}><p>{recipe.name}</p></Link>
+                      <p style={{ marginBottom: '0' }}>Likes: {recipe.likes}</p>
 
-                    return (
-                      <p 
-                        className="delete-button"
-                        onClick={() => handleDelete(deleteUserRecipe)}
-                      
-                      >{attrs.loading ? 'deleting...' : 'X'}
-                      </p>
-                    )
-                  }
+                      <Mutation
+                        mutation={DELETE_USER_RECIPE} variables={{ _id: recipe._id }}
+                        refetchQueries={() => [
+                          { query: GET_ALL_RECIPES },
+                          { query: GET_CURRENT_USER }
+                        ]}
+                        update={(cache, { data: { deleteUserRecipe } }) => {
+                          const { getUserRecipes } = cache.readQuery({
+                            query: GET_USER_RECIPES,
+                            variables: { username }
+                          });
+
+                          cache.writeQuery({
+                            query: GET_USER_RECIPES,
+                            variables: { username },
+                            data: {
+                              getUserRecipes: getUserRecipes.filter(recipe => recipe._id !== deleteUserRecipe._id)
+                            }
+                          })
+                        }}
+                      >
+                        {
+                          (deleteUserRecipe, attrs = {}) => {
+
+                            return (
+                              <div>
+                                <button
+                                  className="button-primary"
+                                  onClick={() => this.loadRecipe(recipe)}
+                                >Update</button>
+                                <p
+                                  className="delete-button"
+                                  onClick={() => this.handleDelete(deleteUserRecipe)}
+
+                                >{attrs.loading ? 'deleting...' : 'X'}
+                                </p>
+                              </div>
+                            )
+                          }
+                        }
+
+                      </Mutation>
+                    </li>
+                  ))
                 }
-                  
-                </Mutation>
-              </li>
-            ))
+              </ul>
+            )
           }
-          </ul>
-        )
-      }
+        }
+      </Query>
+    )
+  }
+}
+
+const EditRecipeModal = ({ handleSubmit, recipe, handleChange, closeModal }) => (
+  <Mutation
+    mutation={UPDATE_USER_RECIPE}
+    variables={{
+      _id: recipe._id,
+      name: recipe.name,
+      imageUrl: recipe.imageUrl,
+      category: recipe.category,
+      description: recipe.description
+    }}
+  >
+    {
+      updateUserRecipe => (
+        <div className="modal modal-open">
+          <div className="modal-inner">
+            <div className="modal-content">
+              <form 
+                onSubmit={(event) => handleSubmit(event, updateUserRecipe)}
+                className="modal-content-inner">
+                <h4>Edit Recipe</h4>
+
+                <input
+                  type="text"
+                  name="name"
+                  onChange={handleChange}
+                  value={recipe.name}
+                />
+
+                <input
+                  type="text"
+                  name="imageUrl"
+                  onChange={handleChange}
+                  value={recipe.imageUrl}
+                />
+
+                <select
+                  name="category"
+                  onChange={handleChange}
+                  value={recipe.category}
+                >
+                  <option value="Breakfast">Breakfast</option>
+                  <option value="Lunch">Lunch</option>
+                  <option value="Dinner">Dinner</option>
+                  <option value="Snack">Snack</option>
+                </select>
+
+                <input
+                  type="text"
+                  name="description"
+                  onChange={handleChange}
+                  value={recipe.description}
+                />
+
+                <hr />
+                <div className="modal-buttons">
+                  <button type="submit" className="button-primary">Update</button>
+                  <button onClick={closeModal}>Cancel</button>
+                </div>
+
+              </form>
+            </div>
+          </div>
+        </div>
+      )
     }
-  </Query>
-  
+  </Mutation>
+
 )
 
 export default UserRecipes;

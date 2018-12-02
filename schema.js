@@ -46,6 +46,14 @@ exports.typeDefs = `
 
     deleteUserRecipe(_id: ID): Recipe
 
+    updateUserRecipe(
+      _id: ID!, 
+      name: String!, 
+      description: String!, 
+      imageUrl: String!,
+      category: String! 
+    ): Recipe
+
     likeRecipe(_id: ID!, username: String!): Recipe
 
     unlikeRecipe(_id: ID!, username: String!): Recipe

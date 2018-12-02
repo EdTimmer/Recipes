@@ -30,8 +30,10 @@ import { setContext } from 'apollo-link-context';
 // Connect front-end to back-end (using Apollo 2.0)
 
 const httpLink = createHttpLink({
-  uri: 'http://localhost:4444/graphql',
-  // uri: "https://recipes-react-graphql.herokuapp.com/graphql"
+  //For Development
+  // uri: "http://localhost:4444/graphql",
+  //For Deployment
+  uri: "https://recipes-react-graphql.herokuapp.com/graphql"
 });
 
 const authLink = setContext((_, { headers }) => {
@@ -48,7 +50,12 @@ const authLink = setContext((_, { headers }) => {
 
 const client = new ApolloClient({
   link: authLink.concat(httpLink),
-  cache: new InMemoryCache()
+  cache: new InMemoryCache(),
+  onError: ({ networkError }) => {
+    if (networkError) {
+      localStorage.setItem('token', '');
+    }
+  }
 });
 
 const Root = ({ refetch, session }) => (

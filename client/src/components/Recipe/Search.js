@@ -25,6 +25,7 @@ class Search extends React.Component {
           <div className="App">
             <input 
               type="search" 
+              className="search"
               placeholder="Search for Recipes" 
               onChange={async event => {
                 event.persist();
@@ -42,8 +43,7 @@ class Search extends React.Component {
             </ul>
           </div>
         )
-      }
-  
+      }  
     </ApolloConsumer>
     )
   }
@@ -53,25 +53,3 @@ class Search extends React.Component {
 
 
 export default Search;
-
-// <Query query={SEARCH_RECIPES} variables={{ searchTerm: "" }}>
-//   {
-//     ({ data, loading, error }) => {
-//       if (loading) return <div>Loading</div>
-//       if (error) return <div>Error</div>
-//       return (
-//         <div className="App">
-//           <input type="search" />
-//           <ul>
-//             {data.searchRecipes.map(recipe =>
-//               <li key={recipe._id}>
-//                 <Link to={`/recipes/${recipe._id}`}><h4>{recipe.name}</h4></Link>
-//                 <p>{recipe.likes}</p>
-//               </li>
-//             )}
-//           </ul>
-//         </div>
-//       )
-//     }
-//   }
-// </Query>

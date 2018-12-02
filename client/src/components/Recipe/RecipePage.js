@@ -36,7 +36,7 @@ const RecipePage = ({ match }) => {
                     Created by <strong>{data.getRecipe.username}</strong>
                   </p>
                   <p>
-                    {data.getRecipe.likes} <span role="img" aria-label="heart">♥</span>
+                    <span style={{fontSize: '30px'}}>{data.getRecipe.likes}</span> <span className="heart" role="img" aria-label="heart">❤️️</span>
                   </p>
 
                 </div>
@@ -44,9 +44,9 @@ const RecipePage = ({ match }) => {
                   {data.getRecipe.description}
                 </blockquote>
                 <h3 className="recipe-instructions__title">Instructions</h3>
-                <div className="recipe-instructions">
-                  {data.getRecipe.instructions}
-                </div>
+                <div 
+                  className="recipe-instructions" dangerouslySetInnerHTML={{ __html: data.getRecipe.instructions }}
+                />
                 <LikeRecipe _id={_id} />
               </div>
               

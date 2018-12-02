@@ -3,7 +3,7 @@ import './App.css';
 
 import { Query } from 'react-apollo';
 import { GET_ALL_RECIPES } from '../queries';
-import { link } from 'fs';
+// import { link } from 'fs';
 import RecipeItem from "./Recipe/RecipeItem";
 
 const App = () => (
